@@ -24,11 +24,6 @@
   connection: local
   when: prgmr_server_name is not defined
 
-- name: Set skip_setup to true if not defined
-  set_fact: skip_setup=false
-  connection: local
-  when: skip_setup is not defined
-
 - debug: msg="install_distro {{ssh_cmd}} {{distro}} {{production_bits}}"
 
 - name: Install distro
@@ -47,7 +42,7 @@
   script: ubuntu_distro \"/usr/bin/ssh -F {{project_root}}/ssh/config {{inventory_hostname}}\" {{prgmr_server_name}} {{production_root_password}}
   register: console
   connection: local
-  when: (skip_setup is not defined or skip_setup) and distro in ('ubuntu')
+  when: (skip_setup is not defined or not skip_setup) and distro in ('ubuntu')
 
 - debug: msg="{{console}}"
   connection: local
