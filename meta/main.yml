@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: George Lee
+  description: Installs pre-built distributions from prgmr.com and optionally sets them up.
+  license: BSD
+  min_ansible_version: 1.4
+  platforms:
+  - name: Ubuntu
+    versions:
+    - saucy
+    - trusty
+  categories:
+  - system
+dependencies: []
