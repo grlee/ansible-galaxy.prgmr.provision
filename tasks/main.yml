@@ -1,0 +1,57 @@
+---
+- name: Fail is distro is not set
+  fail: msg="You must set 'distro' to use this role"
+  connection: local
+  when: distro is not defined
+
+- name: Fail is production_bits is not set
+  fail: msg="You must set 'production_bits' to use this role"
+  connection: local
+  when: production_bits is not defined
+
+- name: Fail if production_root_password is not set
+  fail: msg="You must set 'production_root_password' to use this role"
+  connection: local
+  when: production_root_password is not defined
+
+- name: Fail if project_root is not set
+  fail: msg="You must set 'ssh_cmd' to use this role"
+  connection: local
+  when: ssh_cmd is not defined
+
+- name: Fail if prgmr_server_name is not set
+  fail: msg="You must set 'prgmr_server_name' to use this role"
+  connection: local
+  when: prgmr_server_name is not defined
+
+- name: Set skip_setup to true if not defined
+  set_fact: skip_setup=false
+  connection: local
+  when: skip_setup is not defined
+
+- debug: msg="install_distro {{ssh_cmd}} {{distro}} {{production_bits}}"
+
+- name: Install distro
+  script: "install_distro {{ssh_cmd}} {{distro}} {{production_bits}}"
+  connection: local
+  register: console
+
+- debug: msg="{{console}}"
+  connection: local
+
+- name: Wait for server to reboot completely
+  pause: seconds=60
+  connection: local
+
+- name: Setup ubuntu
+  script: ubuntu_distro \"/usr/bin/ssh -F {{project_root}}/ssh/config {{inventory_hostname}}\" {{prgmr_server_name}} {{production_root_password}}
+  register: console
+  connection: local
+  when: (skip_setup is not defined or skip_setup) and distro in ('ubuntu')
+
+- debug: msg="{{console}}"
+  connection: local
+
+- name: Wait for server to reboot completely
+  pause: seconds=60
+  connection: local

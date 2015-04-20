@@ -1,0 +1,78 @@
+#!/bin/bash
+#root_dir="$(test -d .git && echo "." || echo "$(git rev-parse --show-cdup)")"
+
+ssh_cmd=$1; shift
+
+if [ "$ssh_cmd" == "" ]; then
+	echo "ssh_cmd must be set"
+	exit 1
+fi
+
+hostname_long=$1; shift
+
+if [ "$hostname_long" == "" ]; then
+	echo "hostname must be set"
+	exit 1
+fi
+
+hostname_short=$( echo $hostname_long | sed 's/\..*//g')
+
+root_password=$1; shift
+
+if [ "$root_password" == "" ]; then
+	echo "Root password must be set"
+	exit 1
+fi
+
+
+expect_script="/tmp/$(basename $0).$$.expr"
+
+echo "Generating keys"
+ansible_password=$(date +%s | shasum | base64 | head -c 64 ; echo)
+ansible_public_key=$(cat $HOME/.ssh/ansible.pub)
+
+if [ "$ansible_public_key" == "" ]; then
+	echo "No ansible public key found on provisioning server"
+	exit 1
+fi
+
+echo "Setting up script $expect_script"
+
+cat > $expect_script <<EOM
+set timeout 20
+
+spawn $ssh_cmd
+
+expect "enter selection>" { sleep 2; send "4\r" }
+expect "enter selection>" { sleep 2; send "2\r" }
+expect " for a command-line." { sleep 1; send "\r"}
+expect " for a command-line." { sleep 1; send "\r"}
+sleep 30
+expect "login:" { sleep 1; send "root\r"; sleep 5 }
+expect "root@grlee:~#" { send "passwd\r" }
+expect ":" { send "$root_password\r" }
+expect ":" { send "$root_password\r" }
+expect "root@grlee:~#" { send "useradd -m -d /home/ansible -s /bin/bash -c \"Ansible User\" ansible;passwd ansible\r" }
+expect ":" { send "$ansible_password\r" }
+expect ":" { send "$ansible_password\r" }
+expect "root@grlee:~#" { send "adduser ansible sudo\r" }
+expect "root@grlee:~#" { send "su ansible -c 'mkdir -p /home/ansible/.ssh'\r" }
+expect "root@grlee:~#" { send "su ansible -c 'echo $ansible_public_key >> /home/ansible/.ssh/authorized_keys'\r" }
+expect "root@grlee:~#" { send "chmod 700 /home/ansible/.ssh\r" }
+expect "root@grlee:~#" { send "chmod 600 /home/ansible/.ssh/authorized_keys\r" }
+expect "root@grlee:~#" { send "echo \"ansible ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/ansible\r" }
+expect "root@grlee:~#" { send "chmod 0440 /etc/sudoers.d/ansible\r" }
+expect "root@grlee:~#" { send "hostname $hostname_short\r" }
+expect "root@grlee:~#" { send "echo $hostname_short > /etc/hostname\r" }
+expect "root@grlee:~#" { send "shutdown -r now\r" }
+expect "enter selection>" { sleep 2; send "9\r" }
+EOM
+
+echo "Setting up distro"
+/usr/bin/expect $expect_script
+if [ "$?" != "0" ]; then
+	echo "Expect script failed."
+	rm -f $expect_script
+	exit 1
+fi
+rm -f $expect_script; exit 0
