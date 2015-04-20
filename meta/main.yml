@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  author: George Lee
+  description: Installs pre-built distributions from prgmr.com and optionally sets them up.
+  license: MIT
+  min_ansible_version: 1.8.1
+  platforms:
+  - name: Ubuntu
+    versions:
+    - trusty
+  categories:
+  - system
+dependencies: []
