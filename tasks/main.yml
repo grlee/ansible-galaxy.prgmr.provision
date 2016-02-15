@@ -39,7 +39,7 @@
   connection: local
 
 - name: Setup ubuntu
-  script: ubuntu_distro \"/usr/bin/ssh -F {{project_root}}/ssh/config {{inventory_hostname}}\" {{prgmr_server_name}} {{production_root_password}}
+  script: "ubuntu_distro {{ssh_cmd}} {{prgmr_server_name}} {{production_root_password}}"
   register: console
   connection: local
   when: (skip_setup is not defined or not skip_setup) and distro in ('ubuntu')
