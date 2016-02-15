@@ -1,27 +1,27 @@
 #!/bin/bash
 ssh_cmd=$1; shift
 
+echo "ssh_cmd: $ssh_cmd"
 if [ "$ssh_cmd" == "" ]; then
 	echo "ssh_cmd must be set"
 	exit 1
 fi
-echo "ssh_cmd: $ssh_cmd"
 
 
 distro=$1; shift
+echo "distro: $distro"
 if [ "$distro" == "" ]; then
 	echo "distro must be set"
 	exit 1
 fi
-echo "distro: $distro"
 
 
 bits=$1; shift
+echo "bits: $bits"
 if [[ "$bits" != "32" && "$bits" != "64" ]]; then
 	echo "Bits can only be 32 or 64 bit"
 	exit 1
 fi
-echo "bits: $bits"
 
 case $distro in
 	"arch")
@@ -69,17 +69,17 @@ set timeout 5
 
 spawn $ssh_cmd
 
-expect "enter selection>" { sleep 2; send "4\r" }
-expect "enter selection>" { sleep 2; send "2\r" }
-expect " for a command-line." { send "v"; sleep 1; send \r"}
-sleep 30
+expect "enter selection>" { send "4" }
+expect "enter selection>" { send "2" }
+expect " for a command-line." { send "v\r"}
+sleep 60
 send "root\r"
-expect "#" { send "mkfs.ext3 -L PRGMRDISK1 /dev/xvda1\r" }
-expect "#" { send "mount -n /dev/xvda1 /mnt\r" }
-expect "#" { send "tar xzf /distros/$full_distro_name.tar.gz -C /mnt\r" }
-expect "#" { send "umount -n /mnt\r" }
-expect "#" { send "shutdown -r now\r" }
-expect "enter selection>" { sleep 2; send "9\r" }
+expect "root@rescue:~#" { send "mkfs.ext3 -L PRGMRDISK1 /dev/xvda1\r"; sleep 5; send "y\r" }
+expect "root@rescue:~#" { send "mount -n /dev/xvda1 /mnt\r" }
+expect "root@rescue:~#" { send "tar xzf /distros/$full_distro_name.tar.gz -C /mnt\r" }
+expect "root@rescue:~#" { send "umount -n /mnt\r" }
+expect "root@rescue:~#" { send "shutdown -r now\r" }
+expect "enter selection>" { send "9" }
 EOM
 
 /usr/bin/expect $expect_script
