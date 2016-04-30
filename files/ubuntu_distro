@@ -43,29 +43,35 @@ set timeout 20
 
 spawn $ssh_cmd
 
-expect "enter selection>" { sleep 2; send "4\r" }
-expect "enter selection>" { sleep 2; send "2\r" }
-expect " for a command-line." { sleep 1; send "\r"}
-expect " for a command-line." { sleep 1; send "\r"}
-sleep 30
-expect "login:" { sleep 1; send "root\r"; sleep 5 }
-expect "root@grlee:~#" { send "passwd\r" }
-expect ":" { send "$root_password\r" }
-expect ":" { send "$root_password\r" }
-expect "root@grlee:~#" { send "useradd -m -d /home/ansible -s /bin/bash -c \"Ansible User\" ansible;passwd ansible\r" }
-expect ":" { send "$ansible_password\r" }
-expect ":" { send "$ansible_password\r" }
-expect "root@grlee:~#" { send "adduser ansible sudo\r" }
-expect "root@grlee:~#" { send "su ansible -c 'mkdir -p /home/ansible/.ssh'\r" }
-expect "root@grlee:~#" { send "su ansible -c 'echo $ansible_public_key >> /home/ansible/.ssh/authorized_keys'\r" }
-expect "root@grlee:~#" { send "chmod 700 /home/ansible/.ssh\r" }
-expect "root@grlee:~#" { send "chmod 600 /home/ansible/.ssh/authorized_keys\r" }
-expect "root@grlee:~#" { send "echo \"ansible ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/ansible\r" }
-expect "root@grlee:~#" { send "chmod 0440 /etc/sudoers.d/ansible\r" }
-expect "root@grlee:~#" { send "hostname $hostname_short\r" }
-expect "root@grlee:~#" { send "echo $hostname_short > /etc/hostname\r" }
-expect "root@grlee:~#" { send "shutdown -r now\r" }
-expect "enter selection>" { sleep 2; send "9\r" }
+expect "enter selection>" {} timeout {exit 1}
+send "4"
+expect "enter selection>" {} timeout {exit 1}
+send "2"
+expect "Use the ^ and v keys to select which entry is highlighted." {} timeout {exit 1}
+send "\r"
+expect "Use the ^ and v keys to select which entry is highlighted." {} timeout {exit 1}
+set timeout 90
+send "\r"
+expect "login:" {} timeout {exit 1}
+set timeout 20
+send "root\r"
+expect "root@grlee:~#" { send "passwd\r" } timeout {exit 1}
+expect ":" { send "$root_password\r" } timeout {exit 1}
+expect ":" { send "$root_password\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "useradd -m -d /home/ansible -s /bin/bash -c \"Ansible User\" ansible;passwd ansible\r" } timeout {exit 1}
+expect ":" { send "$ansible_password\r" } timeout {exit 1}
+expect ":" { send "$ansible_password\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "adduser ansible sudo\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "su ansible -c 'mkdir -p /home/ansible/.ssh'\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "su ansible -c 'echo $ansible_public_key >> /home/ansible/.ssh/authorized_keys'\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "chmod 700 /home/ansible/.ssh\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "chmod 600 /home/ansible/.ssh/authorized_keys\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "echo \"ansible ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/ansible\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "chmod 0440 /etc/sudoers.d/ansible\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "hostname $hostname_short\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "echo $hostname_short > /etc/hostname\r" } timeout {exit 1}
+expect "root@grlee:~#" { send "shutdown -r now\r" } timeout {exit 1}
+expect "enter selection>" { send "9\r" } timeout {exit 1}
 EOM
 
 echo "Setting up distro"
