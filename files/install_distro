@@ -24,7 +24,7 @@ if [[ "$bits" != "32" && "$bits" != "64" ]]; then
 fi
 
 case $distro in
-	"arch")
+	"arch"k)
 	full_distro_name="arch-2014.09-$bits"
 	;;
 	"centos6")
@@ -33,26 +33,41 @@ case $distro in
 	"centos"|"centos7")
 	full_distro_name="centos7-$bits"
 	;;
-	"debian")
+	"centos-docker"|"centos7-docker")
+	full_distro_name="centos7-docker-$bits"
+	;;
+	"debian-wheezy")
 	full_distro_name="debian-wheezy-7.0-$bits"
 	;;
+	"debian"|"debian-jessie")
+	full_distro_name="debian-jessie-8.0-$bits"
+	;;
 	"debian-rescue")
-	full_distro_name="debian-wheezy-rescue-7.0-$bits"
+	full_distro_name="debian-jessie-rescue-8.0-$bits"
 	;;
-	"fedora")
-	full_distro_name="fedora20--$bits"
+	"fedora22")
+	full_distro_name="fedora22--$bits"
 	;;
-	"netbsd")
+	"fedora"|"fedora23")
+	full_distro_name="fedora23--$bits"
+	;;
+	"netbsd6")
 	full_distro_name="netbsd-6.1.5-$bits"
+	;;
+	"netbsd"|"netbsd7")
+	full_distro_name="netbsd-7.0-$bits"
 	;;
 	"ubuntu-precise")
 	full_distro_name="ubuntu-precise-12.04-$bits"
 	;;
-	"ubuntu"|"ubuntu-trusty")
+	"ubuntu-trusty")
 	full_distro_name="ubuntu-trusty-14.04-$bits"
 	;;
-	"ubuntu-trusty-docker")
+	"ubuntu-docker"|"ubuntu-trusty-docker")
 	full_distro_name="ubuntu-trusty-14.04-docker-$bits"
+	;;
+	"ubuntu"|"ubuntu-wily")
+	full_distro_name="ubuntu-trusty-15.10-$bits"
 	;;
 	*)
 	echo "Unexpected distro $distro"
@@ -65,21 +80,36 @@ echo "Using distro $full_distro_name"
 expect_script="/tmp/$(basename $0).$$.expr"
 
 cat > $expect_script <<EOM	
-set timeout 5
-
+set timeout 15
 spawn $ssh_cmd
 
-expect "enter selection>" { send "4" }
-expect "enter selection>" { send "2" }
-expect " for a command-line." { send "v\r"}
-sleep 60
+expect "enter selection>" {} timeout {exit 1}
+send "4"
+expect "enter selection>" {} timeout {exit 1}
+send "2"
+set timeout 90
+expect "Use the ^ and v keys to select which entry is highlighted." {} timeout {exit 1}
+send "v\r"
+expect "Debian GNU/Linux 8 rescue hvc0" {} timeout {exit 1}
+expect "rescue login:" {} timeout {exit 1}
 send "root\r"
-expect "root@rescue:~#" { send "mkfs.ext3 -L PRGMRDISK1 /dev/xvda1\r"; sleep 5; send "y\r" }
-expect "root@rescue:~#" { send "mount -n /dev/xvda1 /mnt\r" }
-expect "root@rescue:~#" { send "tar xzf /distros/$full_distro_name.tar.gz -C /mnt\r" }
-expect "root@rescue:~#" { send "umount -n /mnt\r" }
-expect "root@rescue:~#" { send "shutdown -r now\r" }
-expect "enter selection>" { send "9" }
+set timeout 15
+expect "root@rescue:~#" {} timeout {exit 1}
+send "mkfs.ext3 -L PRGMRDISK1 /dev/xvda1\r"
+expect "Proceed anyway? (y,n)"
+send "y\r"
+expect "root@rescue:~#" {} timeout {exit 1}
+send "mount -n /dev/xvda1 /mnt\r"
+expect "root@rescue:~#" {} timeout {exit 1}
+set timeout 60
+send "tar xzf /distros/$full_distro_name.tar.gz -C /mnt\r"
+expect "root@rescue:~#" {} timeout {exit 1}
+set timeout 15
+send "umount -n /mnt\r"
+expect "root@rescue:~#" {} timeout {exit 1}
+send "shutdown -r now\r"
+expect "enter selection>" {} timeout {exit 1}
+send 9
 EOM
 
 /usr/bin/expect $expect_script
