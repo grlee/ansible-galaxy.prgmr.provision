@@ -7,7 +7,15 @@ galaxy_info:
   platforms:
   - name: Ubuntu
     versions:
-    - any
+    - trusty
+    - precise
+    - quantal
+    - saucy
+  - name: Fedora
+    versions: 
+    - 16
+    - 17
+    - 18
   categories:
   - system
 dependencies: []
