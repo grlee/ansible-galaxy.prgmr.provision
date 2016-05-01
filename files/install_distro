@@ -80,9 +80,10 @@ echo "Using distro $full_distro_name"
 expect_script="/tmp/$(basename $0).$$.expr"
 
 cat > $expect_script <<EOM	
-set timeout 15
+set timeout 30
 spawn $ssh_cmd
 
+set timeout 15
 expect "enter selection>" {} timeout {exit 1}
 send "4"
 expect "enter selection>" {} timeout {exit 1}
