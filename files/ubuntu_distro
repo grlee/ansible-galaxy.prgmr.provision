@@ -41,6 +41,8 @@ echo "Setting up script $expect_script"
 cat > $expect_script <<EOM
 set timeout 20
 
+send_user "Test"
+
 spawn $ssh_cmd
 
 expect "enter selection>" {} timeout {exit 1}
@@ -50,7 +52,7 @@ send "2"
 expect "Use the ^ and v keys to select which entry is highlighted." {} timeout {exit 1}
 send "\r"
 expect "Use the ^ and v keys to select which entry is highlighted." {} timeout {exit 1}
-set timeout 90
+set timeout 300
 send "\r"
 expect "login:" {} timeout {exit 1}
 set timeout 20
@@ -75,7 +77,7 @@ expect "enter selection>" { send "9\r" } timeout {exit 1}
 EOM
 
 echo "Setting up distro"
-/usr/bin/expect $expect_script
+/usr/bin/expect $expect_script > out.txt
 if [ "$?" != "0" ]; then
 	echo "Expect script failed."
 	rm -f $expect_script
