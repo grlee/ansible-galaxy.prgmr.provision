@@ -67,7 +67,7 @@ case $distro in
 	full_distro_name="ubuntu-trusty-14.04-docker-$bits"
 	;;
 	"ubuntu"|"ubuntu-wily")
-	full_distro_name="ubuntu-trusty-15.10-$bits"
+	full_distro_name="ubuntu-wily-15.10-$bits"
 	;;
 	*)
 	echo "Unexpected distro $distro"

@@ -45,15 +45,20 @@ send_user "Test"
 
 spawn $ssh_cmd
 
+send_user "Shutting down server"
 expect "enter selection>" {} timeout {exit 1}
 send "4"
+send_user "Starting server"
 expect "enter selection>" {} timeout {exit 1}
 send "2"
+send_user "Selecting default distro"
 expect "Use the ^ and v keys to select which entry is highlighted." {} timeout {exit 1}
 send "\r"
 expect "Use the ^ and v keys to select which entry is highlighted." {} timeout {exit 1}
+send_user "Waiting for server to boot"
 set timeout 300
 send "\r"
+send_user ""
 expect "login:" {} timeout {exit 1}
 set timeout 20
 send "root\r"
@@ -77,7 +82,7 @@ expect "enter selection>" { send "9\r" } timeout {exit 1}
 EOM
 
 echo "Setting up distro"
-/usr/bin/expect $expect_script > out.txt
+/usr/bin/expect $expect_script
 if [ "$?" != "0" ]; then
 	echo "Expect script failed."
 	rm -f $expect_script
