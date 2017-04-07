@@ -82,7 +82,7 @@ expect "enter selection>" { send "9\r" } timeout {exit 1}
 EOM
 
 echo "Setting up distro"
-/usr/bin/expect $expect_script
+/usr/bin/expect -d $expect_script
 if [ "$?" != "0" ]; then
 	echo "Expect script failed."
 	rm -f $expect_script
