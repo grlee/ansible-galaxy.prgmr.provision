@@ -34,7 +34,7 @@
 - debug: msg="{{console}}"
   connection: local
 
-- pause: seconds=30
+- pause: seconds=45
 
 - name: Setup ubuntu
   script: "ubuntu_distro {{ssh_cmd}} {{prgmr_server_name}} {{production_root_password}}"
